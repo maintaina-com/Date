@@ -57,16 +57,14 @@ jobs:
         mkdir "${WORK_DIR}/phpdoc-out"
         mv phpDocumentor.phar $BIN_DIR/phpdocumentor
         chmod +x "${BIN_DIR}/phpdocumentor"
-        #echo $BIN_DIR/phpdocumentor -d $UUT_DIR -t "${WORK_DIR}/phpdoc-out"
-        $BIN_DIR/phpdocumentor -d $UUT_DIR -t "${WORK_DIR}/phpdoc-out"
-        ls -lah "${WORK_DIR}/phpdoc-out"
         echo "Creating UUT related dir in docu repo"
-        git rm -r $UUT_DIR/phpdoc-git/${GITHUB_REF##*/}/${REPO}/
         mkdir -p $UUT_DIR/phpdoc-git/${GITHUB_REF##*/}/${REPO}/
-        echo "Copying data to docu repo"
-        cp -ar $WORK_DIR/phpdoc-out/* "${UUT_DIR}/phpdoc-git/${GITHUB_REF##*/}/${REPO}"
+        ## TODO: check for and include lib, src, app (if they exist) but not test or script dirs
+        $BIN_DIR/phpdocumentor -d $UUT_DIR/lib/ -t "${UUT_DIR}/phpdoc-git/${GITHUB_REF##*/}/${REPO}/"
         cd ${UUT_DIR}/phpdoc-git
         git add "${GITHUB_REF##*/}/${REPO}"
+        php indexer.php ${GITHUB_REF##*/} $REPO
+        git add index.html index.json
         git commit -m "Updated phpdoc for $GITHUB_REPOSITORY (${GITHUB_REF##*/} branch) from ci"
         git push
 
